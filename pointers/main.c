@@ -1,45 +1,77 @@
-# include <stdio.h>
-# include <stdlib.h>
+#include <stdio.h>
+#include <stdlib.h>
 
-int main(){
-    printf("Gebe Anzahl an: ");
-    int anzahl = 0; // Variable anzahl mit Wert 0
-    int* pAnzahl = &anzahl; // Zeigt zur Addresse von anzahl
-    scanf("%d", pAnzahl); // Schreibe zum Wert in der angegebenen Adresse den stdio
-    printf("Wert von der Variable anzahl: %d\n", anzahl);
-    printf("Dereferenzierter Wert des pAnzahl Pointer: %d\n", *pAnzahl); // der Zeiger zur Speicheraddresse des Wertes wird aufgelöst in den Wert 
-    printf("Die Speicheraddresse der Variable anzahl: %p\n", pAnzahl);
+int main() {
+    printf("[INFO] Programm gestartet!\n");
 
-    // Wir möchten um Arbeitsspeicher zu schonen, den Linux Kernel nach einem Heap fragen (dynamischer Arbeitsspeicherabschnitt vom Betriebssystem)
+    printf("[INPUT] Bitte Anzahl eingeben: ");
+    int anzahl = 0; // Variable 'anzahl' wird mit dem Wert 0 initialisiert
+    int* pAnzahl = &anzahl; // 'pAnzahl' ist ein Pointer, der auf die Speicheradresse von 'anzahl' zeigt
+
+    // Wir lesen die Eingabe direkt in die Speicherstelle von 'anzahl' ein.
+    // Das bedeutet: scanf schreibt den Wert in die Adresse, die wir mit pAnzahl übergeben.
+    if (scanf("%d", pAnzahl) != 1) {
+        printf("[ERROR] Ungültige Eingabe! Programm wird beendet.\n");
+        return 1;
+    }
+
+    printf("[DEBUG] Adresse der Variable 'anzahl': %p\n", (void*)pAnzahl);
+    printf("[DEBUG] Wert der Variable 'anzahl': %d\n", anzahl);
+    printf("[DEBUG] Dereferenzierter Wert über pAnzahl (also *pAnzahl): %d\n", *pAnzahl);
+    printf("[INFO] Eingabe erfolgreich gelesen!\n");
+
+    // Wir wollen dynamischen Arbeitsspeicher (Heap) vom Betriebssystem anfordern.
+    // malloc fragt beim Linux Kernel nach Speicherblöcken, die NICHT im Stack liegen,
+    // sondern im Heap – einem Bereich für dynamische Allokierung.
+    printf("[INFO] Versuche %d Ganzzahlen (int) auf dem Heap zu reservieren...\n", anzahl);
     int* werte = malloc(anzahl * sizeof(int));
 
-    // Wir checken ob der Pointer zu einer nicht validen Addresse zeigt, da sonst der free eine Arbeitsspeicherverletzung begehen und der Kernel wird sauer!
-    if (werte == NULL){
-        printf("Allokierung von dynamischen Arbeitsspeicher (Heap) vom Linux Kernel fehlgeschlagen!\n");
-        printf("Breche ab um Speicherverletzung zuverhindern!\n");
-        return 1; // Beende das Programm mit Exit Code 1
+    // Wir überprüfen, ob malloc fehlgeschlagen ist.
+    // Falls ja, bekommen wir einen NULL-Pointer zurück.
+    // Ein free(NULL) wäre ungefährlich, aber ein Zugriff auf NULL würde eine Speicherverletzung
+    // (Segmentation Fault) auslösen → Linux Kernel beendet unser Programm mit SIGSEGV.
+    if (werte == NULL) {
+        printf("[ERROR] Speicherallokierung fehlgeschlagen!\n");
+        printf("[FATAL] Breche ab, um Speicherverletzungen zu vermeiden!\n");
+        return 1;
     }
 
-    // Zählen wir einfach in Zähner Schritten von Null bis Anzahl
-    for (int i = 0; i < anzahl; i++)
-    {
-        if (i == 0){
-            werte[i] = 10;
+    printf("[INFO] Speicherallokierung erfolgreich!\n");
+    printf("[DEBUG] Adresse des allokierten Heaps: %p\n", (void*)werte);
+
+    // Nun befüllen wir das Array im Heap.
+    // Wir zählen nicht linear hoch, sondern speichern Vielfache von 10.
+    printf("[INFO] Befülle Array im Heap mit Werten...\n");
+    for (int i = 0; i < anzahl; i++) {
+        if (i == 0) {
+            werte[i] = 10; // erster Wert wird explizit gesetzt
         } else {
-            werte[i] = werte[i - 1] + 10;
+            werte[i] = werte[i - 1] + 10; // alle folgenden sind +10 vom vorherigen
         }
-        printf("Wert von werte im Heap am Index %d: %d\n", i, werte[i]);
     }
 
-    // Vernichte den Heap nach Nutzung um kein Memory Leak zu verursachen sonst wird der Kernel sauer!
-    free(werte);
-    
-    // Vernichte den Zeiger um Arbeitsspeicherverletzungen zu verhindern
-    // Wir fragen den Linux Kernel nach Arbeitsspeicher über malloc, kriegen wir 
-    // Arbeitsspeicher geliehen vom Betriebssystem (Heap) und der Pointer würde nach dem freigeben des Heaps im Arbeitsspeicher
-    // des Betriebssystem rum hängen, was A. unsicher ist und B. eine Arbeitsspeicherverletzung ist und der Kernel wird sauer!
-    pAnzahl = NULL;
+    // Wir geben alle gespeicherten Werte mit ihren Adressen aus.
+    printf("[INFO] Gebe alle gespeicherten Werte mit Adresse aus:\n");
+    for (int i = 0; i < anzahl; i++) {
+        printf("  -> Index %d | Adresse im Heap: %p | Wert: %d\n", i, &werte[i], werte[i]);
+    }
 
-    printf("Wert des pAnzahl Pointer nach seiner Vernichtung: %p\n", pAnzahl);
+    // Wenn wir malloc benutzt haben, müssen wir den Speicher wieder freigeben!
+    // Andernfalls „vergessen“ wir den Speicherblock → Memory Leak.
+    // Viele Leaks → Linux Kernel muss für unseren Prozess immer mehr Speicher reservieren.
+    printf("[INFO] Speicherfreigabe des Heap-Speichers...\n");
+    free(werte);
+    printf("[INFO] Speicher erfolgreich freigegeben!\n");
+
+    // Nach free zeigt unser Pointer 'werte' noch auf die alte Adresse,
+    // ABER diese Adresse ist nun ungültig. Ein Zugriff wäre eine Speicherverletzung!
+    // Darum setzen wir ihn explizit auf NULL → sicherer Programmierstil.
+    pAnzahl = NULL; // auch wenn er hier nur auf eine Stack-Variable zeigte
+    werte = NULL;
+
+    printf("[DEBUG] pAnzahl nach Freigabe/Reset: %p\n", (void*)pAnzahl);
+    printf("[DEBUG] werte nach Freigabe/Reset: %p\n", (void*)werte);
+
+    printf("[INFO] Programm beendet erfolgreich!\n");
     return 0;
 }
