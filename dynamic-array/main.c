@@ -24,11 +24,13 @@ int main(){
         }
         heapArray[i] = input;
         i++;
-        heapArray = realloc(heapArray, (i + 1) * sizeof(int));
-        if (heapArray == NULL){
-            printf("Reallocation failed, ending programm to prevent segfault.\n");
+        int* tmp = realloc(heapArray, (i + 1) * sizeof(int));
+        if (tmp == NULL) {
+            printf("Reallocation failed, ending program to prevent segfault.\n");
+            free(heapArray); // free the old block to prevent leak
             return 1;
         }
+        heapArray = tmp; // only assign if realloc succeeded
     }
     
 
