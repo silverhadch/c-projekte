@@ -15,7 +15,7 @@ void check(int* main_a){
 }
 
 int main(){
-    // sollte im stack "höher" sein also wenn der stack nach unten wächst ist das hier größer und naher des größten Wertes
+    // sollte im stack "höher" sein also wenn der stack nach unten wächst ist das hier größer und naher der wurzel des Stacks
     int a = 0;
     int* pA = &a;
     check(pA);
