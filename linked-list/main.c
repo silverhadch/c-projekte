@@ -1,51 +1,92 @@
-# include "stdio.h"
-# include "stdlib.h"
+#include <stdio.h>
+#include <stdlib.h>
 
-/*  Node should contain a value and the pointer to the next node if we are at the bottom the pointer becomes null
-*   the Head Node will be explicitly know as the rest can be found by going to pointer to pointer 
-*   We need to allow inserts at the top so we duplicate head and then ceate a new one that points to the old head,
-*   inserts at the bottom are just finding the pointer that points to null and set it to the pointer of the new node value and set the new nodes pointer to null
-*   deleting in the middle is just copying the next pointer of the deleted node to the prevoius node then free the delted node, 
-*   at the top we simply make the head move one node and clean up the old head and deleting the end is just making the previous to the end node point to null and free the old end
-*   we also need a way to do this interactivly but that comes later.
-*/
+/*
+ *  Each Node contains a value and a pointer to the next node.
+ *  The last node’s pointer is NULL.
+ *
+ *  The head node is explicitly known; the rest of the list can be
+ *  traversed by following the next pointers.
+ *
+ *  Insertion at the top (prepend):
+ *      - Create a new node.
+ *      - Set its next pointer to the current head.
+ *      - Make the head pointer point to the new node.
+ *
+ *  Insertion at the bottom (append):
+ *      - Traverse the list until you find a node whose 'next' is NULL.
+ *      - Allocate a new node, set its value, set its 'next' to NULL.
+ *      - Link the last node’s 'next' to this new node.
+ *
+ *  Deletion logic (for later):
+ *      - Top: move the head pointer one node forward, free the old head.
+ *      - Middle: point the previous node’s 'next' to the deleted node’s 'next', then free the deleted node.
+ *      - End: set the second-to-last node’s 'next' to NULL, free the last node.
+ *
+ *  Note on pointers:
+ *      C passes everything by value — even pointers.
+ *      So if we pass 'head' (which is a pointer) to a function, the function receives a *copy* of that pointer.
+ *      If we want the function to change 'head' itself (e.g. make it point to a new node),
+ *      we must pass the *address of the pointer* (a pointer-to-pointer).
+ *
+ *      That’s why add_head() takes 'struct Node **old_head' and not 'struct Node *old_head'.
+ *      It allows the function to modify the caller’s pointer directly.
+ */
 
-struct Node {   // Structure declaration
-  int value;           // Value in Node
-  struct Node *next;   // Point to next Node
+struct Node {
+    int value;           // The value stored in this node
+    struct Node *next;   // Pointer to the next node (or NULL if end)
 };
 
-// we assign the new node the next pointer to the current head then we make the old_head point to the new one so in main the pointer chnages too
+/*
+ *  Add a new node at the head (start) of the list.
+ *  Takes a pointer-to-pointer because we want to modify the caller’s head pointer.
+ */
 void add_head(struct Node **old_head, int value) {
-  struct Node *new_head = malloc(sizeof(struct Node));
-  new_head->value = value;
-  new_head->next = *old_head;
-  *old_head = new_head;
+    struct Node *new_head = malloc(sizeof(struct Node));
+    if (!new_head) {
+        fprintf(stderr, "Memory allocation failed!\n");
+        exit(1);
+    }
+
+    new_head->value = value;
+    new_head->next = *old_head; // The new node points to the current head
+    *old_head = new_head;       // Update the head pointer itself to the new node
 }
 
-int main(){
-    // The Node is a pointer
+int main() {
+    // Create the first node (the initial head)
     struct Node *head = malloc(sizeof(struct Node));
+    if (!head) {
+        fprintf(stderr, "Memory allocation failed!\n");
+        return 1;
+    }
+
     head->value = 0;
     head->next = NULL;
-    // To pass the pointer by refrence make a pointer to the pointer 
-    struct Node **pHead = &head;
 
-    printf("Head node value: %d\n", head->value);
+    printf("Old head value: %d\n", head->value);
 
-    // we pass by reference the head node pointer via the pHead pointer to a pointer since even pointers get copied by value in C
-    add_head(pHead, 4);
+    // Insert a new head node with value 4
+    // Passing '&head' gives the function the address of the head pointer,
+    // allowing it to change where 'head' points.
+    add_head(&head, 4);
 
-    printf("Head node value: %d\n", head->value);
+    // Now 'head' points to the new node.
+    // The new node points to the old one.
+    printf("New head value: %d\n", head->value);
+    printf("Next node value: %d\n", head->next->value);
 
+    // Clean up: traverse and free all nodes
     struct Node *tmp;
     while (head) {
         tmp = head;
         head = head->next;
         free(tmp);
     }
+
+    // Set to NULL for safety (optional)
     head = NULL;
-    pHead = NULL;
 
     return 0;
 }
