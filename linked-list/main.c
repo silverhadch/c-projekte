@@ -2,57 +2,50 @@
 #include <stdlib.h>
 
 /*
- *  Linked List — Core Idea:
+ * ─────────────────────────────────────────────────────────────
+ * Linked List (Singly-Linked)
+ * ─────────────────────────────────────────────────────────────
  *
- *  A linked list is a sequence of nodes stored on the heap.
- *  Each node contains:
- *      - a value (the actual data)
- *      - a pointer to the next node in the list
+ *  Concept:
+ *      A linked list is a sequence of dynamically allocated nodes.
+ *      Each node stores:
+ *          • a data value
+ *          • a pointer to the next node
  *
- *  The *head* pointer points to the first node.
- *  The *last* node points to NULL, marking the end.
+ *      The list starts at the *head* node, and each node points to
+ *      the next. The final node points to NULL.
  *
- *  Inserting at the top (add_head):
- *      - Allocate a new node.
- *      - Set its next pointer to the current head.
- *      - Update the head pointer to the new node.
+ *  Why use pointers-to-pointers?
+ *      In C, function arguments are passed by value — even pointers.
+ *      To modify the caller’s pointer (like 'head'), you must pass
+ *      its address. That’s why many functions take a `struct Node **`.
  *
- *  Inserting at the end (add_tail):
- *      - Traverse the list until a node’s 'next' is NULL.
- *      - Create a new node, set its value, and make its 'next' NULL.
- *      - Link the last node’s 'next' to the new one.
- *      - If the list was empty, the new node *becomes* the head.
+ *      Example:
+ *          struct Node *head = NULL;
+ *          add_head(&head, 42);   // '&head' allows modifying 'head' itself
  *
- *  Deleting the head (delete_head):
- *      - Temporarily store the current head.
- *      - Move the head pointer to the next node.
- *      - Free the old head node.
+ *  Operations implemented:
+ *      - print_nodes()  : Print all nodes and their addresses.
+ *      - add_head()     : Insert a node at the start.
+ *      - delete_head()  : Remove the first node.
+ *      - add_tail()     : Insert a node at the end.
+ *      - delete_tail()  : Remove the last node.
  *
- *  Note on pointer-to-pointer:
- *      - In C, even pointers are passed by value.
- *        That means a function receives a *copy* of the pointer.
- *      - To modify the caller’s pointer (like the actual 'head' variable),
- *        we must pass its *address* (pointer-to-pointer).
- *
- *        Example:
- *            struct Node *head;
- *            add_head(&head, 10);
- *        Inside add_head():
- *            *old_head = new_node;  // directly changes 'head' in main
+ *  This example focuses on correctness and clarity rather than performance.
  */
 
 struct Node {
-    int value;           // Data stored in the node
+    int value;           // Data stored in this node
     struct Node *next;   // Pointer to the next node (NULL if end)
 };
 
-/*
- *  print_nodes()
- *  Traverses the list and prints each node’s value and address.
- *  Useful for visualizing the structure and memory layout.
- */
-void print_nodes(struct Node **head) {
-    struct Node *tmp = *head;
+/*──────────────────────────────────────────────────────────────
+ * print_nodes()
+ * Prints all nodes in the list along with their memory addresses.
+ * Useful for debugging and understanding how nodes are linked.
+ *──────────────────────────────────────────────────────────────*/
+void print_nodes(struct Node *head) {
+    struct Node *tmp = head;
     int i = 0;
 
     while (tmp != NULL) {
@@ -64,97 +57,119 @@ void print_nodes(struct Node **head) {
     }
 
     if (i == 0)
-        printf("[empty list]\n");
+        printf("[empty list]\n\n");
 }
 
-/*
- *  add_head()
- *  Creates a new node and inserts it at the start of the list.
- *  Requires a pointer-to-pointer so the function can change the head itself.
- */
-void add_head(struct Node **old_head, int value) {
+/*──────────────────────────────────────────────────────────────
+ * add_head()
+ * Inserts a new node at the beginning of the list.
+ *──────────────────────────────────────────────────────────────*/
+void add_head(struct Node **head, int value) {
     struct Node *new_head = malloc(sizeof(struct Node));
     if (!new_head) {
         fprintf(stderr, "Memory allocation failed!\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     new_head->value = value;
-    new_head->next = *old_head;  // Link new node to the current head
-    *old_head = new_head;        // Update the head pointer itself
+    new_head->next = *head;  // Link new node to current head
+    *head = new_head;        // Update head pointer
 }
 
-/*
- *  delete_head()
- *  Removes the first node in the list and frees its memory.
- */
-void delete_head(struct Node **old_head) {
-    if (*old_head == NULL)
-        return; // Nothing to delete
+/*──────────────────────────────────────────────────────────────
+ * delete_head()
+ * Removes the first node and updates the head pointer.
+ *──────────────────────────────────────────────────────────────*/
+void delete_head(struct Node **head) {
+    if (*head == NULL)
+        return; // List is empty, nothing to delete
 
-    struct Node *tmp = *old_head;   // Save current head
-    *old_head = tmp->next;          // Move head to the next node
-    free(tmp);                      // Free old head
+    struct Node *tmp = *head;   // Store current head
+    *head = tmp->next;          // Move head to next node
+    free(tmp);                  // Free old head
 }
 
-/*
- *  add_tail()
- *  Adds a new node at the end of the list.
- *  If the list is empty, the new node becomes the head.
- */
+/*──────────────────────────────────────────────────────────────
+ * add_tail()
+ * Appends a new node at the end of the list.
+ * If the list is empty, the new node becomes the head.
+ *──────────────────────────────────────────────────────────────*/
 void add_tail(struct Node **head, int value) {
     struct Node *new_tail = malloc(sizeof(struct Node));
     if (!new_tail) {
         fprintf(stderr, "Memory allocation failed!\n");
-        exit(1);
+        exit(EXIT_FAILURE);
     }
 
     new_tail->value = value;
-    new_tail->next = NULL; // Always terminate properly
+    new_tail->next = NULL; // End of list
 
-    // If list is empty, this new node becomes the head
     if (*head == NULL) {
+        // Empty list: new node becomes head
         *head = new_tail;
         return;
     }
 
-    // Otherwise, find the last node
+    // Traverse to last node
     struct Node *tmp = *head;
     while (tmp->next != NULL)
         tmp = tmp->next;
 
-    // Link old tail to new tail
-    tmp->next = new_tail;
+    tmp->next = new_tail; // Link the old tail to new tail
 }
 
-/*
- *  main()
- *  Demonstrates linked list operations: create, add_head, delete_head, add_tail, print, cleanup.
- */
-int main() {
-    // Create initial head node
-    struct Node *head = malloc(sizeof(struct Node));
-    if (!head) {
-        fprintf(stderr, "Memory allocation failed!\n");
-        return 1;
+/*──────────────────────────────────────────────────────────────
+ * delete_tail()
+ * Deletes the last node in the list.
+ * Handles both single-node and multi-node cases.
+ *──────────────────────────────────────────────────────────────*/
+void delete_tail(struct Node **head) {
+    if (*head == NULL)
+        return; // Empty list
+
+    // If there's only one node
+    if ((*head)->next == NULL) {
+        free(*head);
+        *head = NULL;
+        return;
     }
 
-    head->value = 0;
-    head->next = NULL;
+    // Traverse to the second-to-last node
+    struct Node *tmp = *head;
+    while (tmp->next->next != NULL)
+        tmp = tmp->next;
 
-    // Insert at head
+    // tmp now points to second-to-last
+    struct Node *to_delete = tmp->next;
+    tmp->next = NULL;  // Update new tail
+    free(to_delete);   // Free old tail
+}
+
+/*──────────────────────────────────────────────────────────────
+ * main()
+ * Demonstrates basic linked list operations.
+ *──────────────────────────────────────────────────────────────*/
+int main(void) {
+    struct Node *head = NULL; // Start with an empty list
+
+    // Build a list step-by-step
     add_head(&head, 4);
-    // Delete head
-    delete_head(&head);
-    // Append a few nodes
+    add_head(&head, 67);
     add_tail(&head, 7);
     add_tail(&head, 6);
     add_tail(&head, 9);
 
-    // Print all nodes
-    print_nodes(&head);
+    printf("List after insertions:\n");
+    print_nodes(head);
 
-    // Free all allocated memory
+    // Delete operations
+    delete_head(&head);
+    delete_tail(&head);
+
+    printf("List after deleting head and tail:\n");
+    print_nodes(head);
+
+    // Cleanup all nodes
     struct Node *tmp;
     while (head) {
         tmp = head;
@@ -162,6 +177,6 @@ int main() {
         free(tmp);
     }
 
-    head = NULL; // Optional safety clear
+    head = NULL;
     return 0;
 }
