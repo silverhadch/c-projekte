@@ -24,15 +24,17 @@ void add_head(struct Node **old_head, int value) {
 }
 
 int main(){
-    // The Node is a pointer *, we need ** to dereference the Node
+    // The Node is a pointer
     struct Node *head = malloc(sizeof(struct Node));
     head->value = 0;
     head->next = NULL;
+    // To pass the pointer by refrence make a pointer to the pointer 
+    struct Node **pHead = &head;
 
     printf("Head node value: %d\n", head->value);
 
-    // we pass by reference the head node
-    add_head(&head, 4);
+    // we pass by reference the head node pointer via the pHead pointer to a pointer since even pointers get copied by value in C
+    add_head(pHead, 4);
 
     printf("Head node value: %d\n", head->value);
 
@@ -43,6 +45,7 @@ int main(){
         free(tmp);
     }
     head = NULL;
+    pHead = NULL;
 
     return 0;
 }
