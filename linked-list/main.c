@@ -15,17 +15,33 @@ struct Node {   // Structure declaration
   struct Node *next;   // Point to next Node
 };
 
+// we assign the new node the next pointer to the current head then we make the old_head point to the new one so in main the pointer chnages too
+void add_head(struct Node **old_head, int value) {
+  struct Node *new_head = malloc(sizeof(struct Node));
+  new_head->value = value;
+  new_head->next = *old_head;
+  *old_head = new_head;
+}
+
 int main(){
-    // Dont start on the stack lmao
-    // struct Node head;
-    // head.next = NULL;
+    // The Node is a pointer *, we need ** to dereference the Node
     struct Node *head = malloc(sizeof(struct Node));
     head->value = 0;
     head->next = NULL;
 
     printf("Head node value: %d\n", head->value);
 
-    free(head); // clean up
+    // we pass by reference the head node
+    add_head(&head, 4);
+
+    printf("Head node value: %d\n", head->value);
+
+    struct Node *tmp;
+    while (head) {
+        tmp = head;
+        head = head->next;
+        free(tmp);
+    }
     head = NULL;
 
     return 0;
