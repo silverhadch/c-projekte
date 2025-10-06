@@ -128,11 +128,11 @@ void modify_tail(struct Node *head, int value) {
     if (head == NULL)
         return;
 
-    struct Node *tmp = head;
-    while (tmp->next != NULL)  // walk to last node
-        tmp = tmp->next;
-
-    tmp->value = value;        // modify tail value
+    struct Node *tail = head;
+    while (tail->next != NULL) {
+        tail = tail->next;
+    }
+    tail->value = value;
 }
 
 /*──────────────────────────────────────────────────────────────
