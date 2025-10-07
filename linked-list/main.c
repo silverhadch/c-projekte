@@ -135,6 +135,38 @@ void modify_tail(struct Node *head, int value) {
     tail->value = value;
 }
 
+void delete_node(struct Node **head, int position) 
+{
+    if (*head == NULL)
+        return;
+    
+    int i = 0;
+    struct Node *tmp = *head;
+    while (i != position) {
+        i++;
+        if (tmp->next == NULL)
+        {
+            break;
+        }
+        tmp = tmp->next;
+    }
+
+    if (tmp == *head) {
+        delete_head(head);
+    } else if (tmp->next == NULL) {
+        delete_tail(head);
+    } else {
+        struct Node *next = tmp->next;
+        struct Node *delete = tmp;
+        tmp = *head;
+        while (tmp->next != delete) {
+            tmp = tmp->next;
+        }
+        tmp->next = next;
+        free(delete);
+    }  
+};
+
 /*──────────────────────────────────────────────────────────────
  * main()
  *──────────────────────────────────────────────────────────────*/
