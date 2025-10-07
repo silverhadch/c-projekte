@@ -78,7 +78,7 @@ void add_head(struct Node **head, int value) {
 void delete_head(struct Node **head) {
     if (*head == NULL)
         return;
-
+        
     // store current head to free later
     struct Node *tmp = *head;
 
@@ -302,7 +302,7 @@ void modify_node(struct Node **head, int position, int value) {
  *──────────────────────────────────────────────────────────────*/
 int main(void) {
     struct Node *head = NULL;
-
+    
     // Build list
     add_head(&head, 4);
     add_head(&head, 67);
