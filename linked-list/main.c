@@ -204,19 +204,31 @@ int main(void) {
     printf("List after insertions:\n");
     print_nodes(head);
 
+    // Modify endpoints
     modify_head(head, 100);
     modify_tail(head, 999);
 
     printf("After modifying head and tail:\n");
     print_nodes(head);
 
+    // Delete head and tail
     delete_head(&head);
     delete_tail(&head);
 
     printf("After deleting head and tail:\n");
     print_nodes(head);
 
-    // Cleanup
+    // Delete node in the middle (position 1 → second element)
+    printf("Deleting node at position 1:\n");
+    delete_node(&head, 1);
+    print_nodes(head);
+
+    // Try deleting out of range (should safely do nothing)
+    printf("Deleting node at out-of-range position 10:\n");
+    delete_node(&head, 10);
+    print_nodes(head);
+
+    // Final cleanup
     struct Node *tmp;
     while (head) {
         tmp = head;
@@ -224,5 +236,6 @@ int main(void) {
         free(tmp);
     }
 
+    head = NULL;
     return 0;
 }
