@@ -135,37 +135,58 @@ void modify_tail(struct Node *head, int value) {
     tail->value = value;
 }
 
+/*──────────────────────────────────────────────────────────────
+ * delete_node()
+ *──────────────────────────────────────────────────────────────
+ * Deletes a node at a given position (0-based index).
+ *
+ *  Example:
+ *      head → [A] → [B] → [C] → [D]
+ *      delete_node(&head, 2);
+ *      Result: head → [A] → [B] → [D]
+ *
+ *  Logic:
+ *      1. If list is empty → nothing to delete.
+ *      2. If position == 0 → reuse delete_head().
+ *      3. Traverse the list until reaching the node *before* the target.
+ *      4. Adjust pointers to skip the target node.
+ *      5. Free the removed node.
+ *
+ *  Notes:
+ *      - If position is out of range, the function simply returns.
+ *      - No memory leaks occur since only the target node is freed.
+ *      - Safe for single-node and multi-node lists.
+ *──────────────────────────────────────────────────────────────*/
 void delete_node(struct Node **head, int position) 
 {
     if (*head == NULL)
+        return;  // Empty list
+
+    // Case 1: Delete first node (head)
+    if (position == 0) {
+        delete_head(head);
         return;
-    
-    int i = 0;
-    struct Node *tmp = *head;
-    while (i != position) {
-        i++;
-        if (tmp->next == NULL)
-        {
-            break;
-        }
-        tmp = tmp->next;
     }
 
-    if (tmp == *head) {
-        delete_head(head);
-    } else if (tmp->next == NULL) {
-        delete_tail(head);
-    } else {
-        struct Node *next = tmp->next;
-        struct Node *delete = tmp;
-        tmp = *head;
-        while (tmp->next != delete) {
-            tmp = tmp->next;
-        }
-        tmp->next = next;
-        free(delete);
-    }  
-};
+    struct Node *prev = *head;
+    int i = 0;
+
+    // Traverse to the node *before* the one we want to delete
+    while (prev != NULL && i < position - 1) {
+        prev = prev->next;
+        i++;
+    }
+
+    // If position is out of range or no next node exists → nothing to delete
+    if (prev == NULL || prev->next == NULL)
+        return;
+
+    // Case 2: Delete target node in the middle or end
+    struct Node *to_delete = prev->next;
+    prev->next = to_delete->next;  // Bypass the deleted node
+
+    free(to_delete);
+}
 
 /*──────────────────────────────────────────────────────────────
  * main()
