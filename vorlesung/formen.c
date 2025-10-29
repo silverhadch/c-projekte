@@ -47,7 +47,7 @@ int main() {
     scanf("%d", &auswahl);
 
     int size;
-    printf("Gebe Groeße als Ganzzahl (beim Kreis geht nur gerade Ganzzahlen) ein: \n");
+    printf("Gebe Groeße als Ganzzahl ein: \n");
     scanf("%d", &size);
 
     if (auswahl == 0) {
