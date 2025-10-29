@@ -1,6 +1,19 @@
+# Ignore everything by default
+*
+
+# Allow directories (so folder structure is preserved)
+!*/
+
+# Allow source files and Makefiles
+!*.asm
+!*.c
+!Makefile
+
+# Ignore common build and editor files
 */main
 */build
 */.vscode
 */tempCodeRunnerFile
 build/
 .vscode/
+tempCodeRunnerFile*
