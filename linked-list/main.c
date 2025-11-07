@@ -10,12 +10,6 @@
  *      - Adding, deleting, and modifying head and tail
  *      - Inserting, deleting, and modifying at arbitrary positions
  *      - Printing node structure with addresses
- *
- * Focus areas (where people often get confused):
- *      1. Understanding **pointer-to-pointer (Node **)** parameters
- *      2. Traversing correctly with indexes
- *      3. Updating `next` pointers in the right order
- *      4. Avoiding dereferencing freed memory
  */
 
 struct Node {
@@ -50,8 +44,8 @@ void print_nodes(struct Node *head) {
  *──────────────────────────────────────────────────────────────
  * Adds a node to the beginning of the list.
  *
- * We use a **pointer to pointer** (Node **) because we might
- * need to update the *head* pointer itself.
+ * We use a pointer to pointer (Node **) because we might
+ * need to update the head pointer in main() itself.
  *──────────────────────────────────────────────────────────────*/
 void add_head(struct Node **head, int value) {
     // allocate memory for a new node
