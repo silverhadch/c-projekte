@@ -10,7 +10,7 @@
  *      - Adding, deleting, and modifying head and tail
  *      - Inserting, deleting, and modifying at arbitrary positions
  *      - Printing node structure with addresses
- */
+ *──────────────────────────────────────────────────────────────/
 
 struct Node {
     int value;
