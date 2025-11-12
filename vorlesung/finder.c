@@ -8,19 +8,15 @@ struct coordinates {
 };
 
 double distance(int x1, int y1, int x2, int y2) {
-    // Use double for accurate distance calculation
     double dx = x2 - x1;
     double dy = y2 - y1;
-    double dist = sqrt(dx * dx + dy * dy);
-
-    return dist;
+    return sqrt(dx * dx + dy * dy);
 }
 
-
 int main(void) {
-    struct coordinates cord = {0}; // initialize all to 0
-
+    struct coordinates cord = {0};
     int x1, y1, x2, y2;
+    int mode; // Verkehrsmittel
 
     printf("Gebe Koordinate x1 ein (0–9): ");
     scanf("%d", &x1);
@@ -34,14 +30,14 @@ int main(void) {
     printf("Gebe Koordinate y2 ein (0–9): ");
     scanf("%d", &y2);
 
-    // check that coordinates are valid
-    if (x1 < 0 || x1 >= SIZE || y1 < 0 || y1 >= SIZE || x2 < 0 || x2 >= SIZE || y2 < 0 || y2 >= SIZE) {
+    if (x1 < 0 || x1 >= SIZE || y1 < 0 || y1 >= SIZE ||
+        x2 < 0 || x2 >= SIZE || y2 < 0 || y2 >= SIZE) {
         printf("Fehler: Koordinaten außerhalb des Bereichs!\n");
         return 1;
     }
 
-    cord.grid[y1][x1] = 1; // mark first point
-    cord.grid[y2][x2] = 2; // mark second point
+    cord.grid[y1][x1] = 1;
+    cord.grid[y2][x2] = 2;
 
     printf("\nKoordinatensystem (10x10):\n");
     for (int y = 0; y < SIZE; y++) {
@@ -51,11 +47,37 @@ int main(void) {
         printf("\n");
     }
 
-    printf("\nPunkt 1: (%d, %d)\n", x1, y1);
-    printf("Punkt 2: (%d, %d)\n", x2, y2);
-
     double dist = distance(x1, y1, x2, y2);
-    printf("Distance: %.2f\n", dist);
+    printf("\nDistanz zwischen den Punkten: %.2f Einheiten\n", dist);
+
+    // Verkehrsmittel auswählen
+    printf("\nWähle das Verkehrsmittel:\n");
+    printf("1 - Auto (100 km/h)\n");
+    printf("2 - Fahrrad (20 km/h)\n");
+    printf("3 - Zu Fuß (5 km/h)\n");
+    printf("Deine Auswahl: ");
+    scanf("%d", &mode);
+
+    double speed = 0.0;
+    switch (mode) {
+        case 1: speed = 100.0; break;
+        case 2: speed = 20.0; break;
+        case 3: speed = 5.0; break;
+        default:
+            printf("Ungültige Auswahl!\n");
+            return 1;
+    }
+
+    // Wir nehmen an: 1 Gittereinheit = 1 km
+    double time = dist / speed; // Stunden
+    double minutes = time * 60.0;
+
+    printf("\nVerkehrsmittel: ");
+    if (mode == 1) printf("Auto\n");
+    else if (mode == 2) printf("Fahrrad\n");
+    else printf("Zu Fuß\n");
+
+    printf("Fahrzeit: %.2f Stunden (≈ %.1f Minuten)\n", time, minutes);
 
     return 0;
 }

@@ -8,6 +8,7 @@
 !*.asm
 !*.c
 !Makefile
+!*.txt
 
 # Ignore common build and editor files
 */main
